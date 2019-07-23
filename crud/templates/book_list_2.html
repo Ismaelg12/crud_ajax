@@ -1,0 +1,25 @@
+{% for book in books %}
+  <tr>
+    <td>{{ book.id }}</td>
+    <td>{{ book.agenda }}</td>
+    <td>{{ book.hora_inicio }}</td>
+    <td>{{ book.hora_fim }}</td>
+    <td>{{ book.paciente }}</td>
+    <td>  
+      <button class="btn btn-warning show-form-update" data-url="{% url 'book_update' book.id %}">
+      <span class="glyphicon glyphicon-pencil"></span>
+      Editar 
+      </button>
+    </td>
+    <td>  
+      <button class="btn btn-danger show-form-delete" data-url="{% url 'book_delete' book.id %}">
+      <span class="glyphicon glyphicon-trash"></span>
+      Remover
+      </button>
+    </td>
+  </tr>
+{% empty %}
+  <tr>
+    <td colspan="7" class="text-center bg-warning">No book</td>
+  </tr>
+{% endfor %}

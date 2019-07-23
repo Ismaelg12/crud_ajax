@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <h1 class="page-header">Agendamentos</h1>
+  <button class="btn btn-primary show-form" data-url="{% url 'book_create' %}">
+  <span class="glyphicon glyphicon-plus"></span>
+  Novo
+  </button>
+  <table class="table" id="book-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Data</th>
+        <th>Hora_inicio</th>
+        <th>Hora_fim</th>
+        <th>paciente</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% include "book_list_2.html" %}
+    </tbody>
+  </table>
+
+  <div class="modal fade" id="modal-book">
+    <div class="modal-dialog">
+      <div class="modal-content"></div>
+    </div>
+  </div>
+    <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header card-header-primary"data-background-color="purple">
+            <h4 class="card-title"> Agenda</h4>
+          </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="card card-calendar">
+                        <div class="card-content" class="ps-child">
+                        <div id="fullCalendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+       </div>
+    </div>
+  </div>
+</div>
+ <!--   Core JS Files   -->
+<script src="{% static 'assets/js/jquery.min.js'%}" type="text/javascript"></script>
+
+
+<script>
+
+         $(document).ready(function () {
+            var calendar = $('#fullCalendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                events: [
+                   
+                    {% for event in agenda %}
+                        {
+                            title: "{{ event.paciente}}",
+                            start: '{{ event.hora_inicio|date:"Y-m-d H:i" }}',
+                            end: '{{ event.hora_fim|date:"Y-m-d  H.i" }}',
+                            id: '{{ event.id }}',
+                        },
+                    {% endfor %}
+                ],
+                selectable: true,
+                selectHelper: true,
+                editable: true,
+                eventLimit: true,
+               select: function (start, end, allDay) {
+                    var title = prompt("Nome do paciente");
+                    //var hora_inicio  = "<input type='text'/>";
+                      $('#createEventModal').modal('show');
+                    //paciente
+                    if (title) {
+                        var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm:ss");
+                        var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm:ss");
+                        $.ajax({
+                            type: "GET",
+                            url: '/adicionar/agendamento/',
+                            data: {'paciente': title, 'hora_inicio': start, 'hora_fim': end},
+                            dataType: "json",
+                            success: function (data) {
+                                calendar.fullCalendar('refetchEvents');
+                                alert("Added Successfully");
+                            },
+                            failure: function (data) {
+                                alert('There is a problem!!!');
+                            }
+                        });
+                    }
+                },
+
+                eventClick: function (event) {
+                    if (confirm("Are you sure you want to remove it?")) {
+                        var id = event.id;
+                        $.ajax({
+                            type: "GET",
+                            url: '/remove',
+                            data: {'id': id},
+                            dataType: "json",
+                            success: function (data) {
+                                calendar.fullCalendar('refetchEvents');
+                                alert('Event Removed');
+                            },
+                            failure: function (data) {
+                                alert('There is a problem!!!');
+                            }
+                        });
+                    }
+                },
+
+            });
+        });
+
+    </script>
+{% endblock %}
+{% block javascript %}
+  {% endblock %}
